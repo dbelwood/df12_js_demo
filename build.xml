@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Model Metrics Project" basedir="." default="usage"
+	xmlns:salesforce="antlib:com.salesforce">
+	<property file="login.properties"/>
+	<property file="project.properties"/>
+	<property name="dir.build" location="" />
+	<property name="dir.build.salesforce" location="${dir.build}/deploy/" />
+	<property name="dir.build.name" location="${dir.build.salesforce}/staticresources/${project.name}" />
+	<property name="dir.source" location="${dir.build}/public" />
+	
+	<!-- Imports -->
+	
+	<target name="usage">
+		<echo level="info">
+	This build supports the following targets:
+	init				Bootstrap the project
+	build             	Package assets for deployment
+	deploy	     		Deploy local changes to dev org
+	    </echo>
+	</target>
+
+	<target name="init">
+		<input 
+			message="Which type of org do you have?: (d)eveloper, (s)andbox or (p)roduction"
+			validargs="d,s,p"
+			addproperty="setup.org_type"
+		/>
+		<input 
+			message="What is your username?: "
+			addproperty="setup.username"
+		/>
+		<input 
+			message="What is your password?: "
+			addproperty="setup.password"
+		/>
+		<input 
+			message="What is your security token?: "
+			addproperty="setup.token"
+		/>
+		<condition property="setup.url_prefix" value="test" else="login">
+			<equals arg1="s" arg2="${setupd.org_type}"/>
+		</condition>
+		<delete file="${dir.build}/login.properties"/>
+		<touch file="${dir.build}/login.properties" mkdirs="true"/>
+  		<echo file="${dir.build}/login.properties">env.login=${setup.username}
+env.password=${setup.password}${setup.token}
+env.url=https://${setup.url_prefix}.salesforce.com
+		</echo>
+	</target>
+	
+	<target name="compile">
+		<echo level="info">Compiling brunch...</echo>
+		<exec executable="brunch" failonerror="true">
+			<arg line="build"/>
+ 		</exec>
+ 		<echo level="info">done.</echo>
+	</target>
+
+	<target name="clean">
+    	<delete file="${dir.build.name}"/>
+  	</target>
+
+  	<target name="presetup">
+  		<condition property="packageDNE">
+  			<not>
+  				<available file="${dir.build.salesforce}/package.xml"/>
+  			</not>
+  		</condition>
+  	</target>
+
+  	<target name="setup" depends="presetup" if="packageDNE">
+  		<touch file="${dir.build.salesforce}/package.xml" mkdirs="true"/>
+  		<echo file="${dir.build.salesforce}/package.xml"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+<Package xmlns='http://soap.sforce.com/2006/04/metadata'>
+	<types>
+		<members>*</members>
+		<name>StaticResource</name>
+	</types>
+	<version>25.0</version>
+</Package>]]>
+		</echo>
+  	</target>
+
+  	<target name="package" depends="compile, clean, setup">
+  		<zip zipfile="${dir.build.name}.resource">
+      		<fileset dir="${dir.source}"/>
+    	</zip>
+  	</target>
+	
+	<target name="deploy" depends="package">
+		<deploy username="${env.login}" password="${env.password}" serverurl="${env.url}" />
+	</target>
+
+	<target name="retrieve">
+		<retrieve username="${env.login}" password="${env.password}" serverurl="${env.url}" />
+	</target>
+
+	<macrodef name="deploy">
+		<attribute name="username"/>
+		<attribute name="password"/>
+		<attribute name="serverurl"/>
+		<sequential>
+			<echo level="info">deploying to @{serverurl} from directory ${dir.build.salesforce}
+			        as user @{username}
+			        and running all Apex tests
+			</echo>
+			<salesforce:deploy username="@{username}" password="@{password}" serverurl="@{serverurl}" deployRoot="${dir.build.salesforce}"
+				runAllTests="false" maxPoll="1000" logtype="Debugonly"/>
+		</sequential>
+	</macrodef>
+	<macrodef name="retrieve">
+		<attribute name="username"/>
+		<attribute name="password"/>
+		<attribute name="serverurl"/>
+		<sequential>
+			<echo level="info">retrieving from @{serverurl} to directory @{fromdir}
+			        as user @{username}
+			</echo>
+			<salesforce:retrieve username="@{username}" password="@{password}" serverurl="@{serverurl}" retrieveTarget="${dir.build.salesforce}" unpackaged="${dir.build.salesforce}/package.xml"/>
+		</sequential>
+	</macrodef>
+</project>
