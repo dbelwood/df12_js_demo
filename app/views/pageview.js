@@ -1,5 +1,5 @@
 var PageUtils = require('lib/page_utils');
-var View = require('./view');
+var View = require('views/view');
 
 module.exports = View.extend({
 	initialize: function() {

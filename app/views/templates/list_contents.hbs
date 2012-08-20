@@ -1,16 +1,9 @@
 <thead>
 	<tr>
 		{{#each columns}}
-		<td>{{ label }}</td>
+		<th>{{ label }}</th>
 		{{/each}}
 	</tr>
 </thead>
 <tbody>
-	{{#each records}}
-	<tr>
-		{{#each columns}}
-		<td>{{render_column_cell ../ this.name}}</td>
-		{{/each}}
-	</tr>
-	{{/each}}
 </tbody>

@@ -85,6 +85,14 @@ env.url=https://${setup.url_prefix}.salesforce.com
   		<zip zipfile="${dir.build.name}.resource">
       		<fileset dir="${dir.source}"/>
     	</zip>
+    	<touch file="${dir.build.name}.resource-meta.xml"/>
+    	<echo file="${dir.build.name}.resource-meta.xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<StaticResource xmlns="http://soap.sforce.com/2006/04/metadata">
+    <cacheControl>Private</cacheControl>
+    <contentType>application/zip</contentType>
+    <description>All static resources are included within this zip.</description>
+</StaticResource>]]>
+		</echo>
   	</target>
 	
 	<target name="deploy" depends="package">

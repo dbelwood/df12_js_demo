@@ -1,11 +1,16 @@
 var PageView = require("views/pageview");
-var ListView = require("views/list_view");
+var AccountListView = require("views/account_list_view");
+var Remoting = require("lib/remoting");
 
 module.exports = PageView.extend({
+	subscriptions: {
+		"accounts:updated": "fetchAccounts"
+	},
 	initialize: function() {
 		PageView.prototype.initialize.apply(this, this.options);
 		this.accounts = new Backbone.Collection();
-		this.listView = new ListView({
+		this.$el = $("body");
+		this.listView = new AccountListView({
 			collection: this.accounts, 
 			columns: [
 				{label: "Name", name: "Name"},
@@ -13,12 +18,16 @@ module.exports = PageView.extend({
 				{label: "City", name: "BillingCity"},
 				{label: "Postal Code", name: "BillingPostalCode"},
 				{label: "Country", name: "BillingCountry"}
-			]
+			],
+			el: this.$("#list")
 		});
 	},
 	render: function() {
-		this.listView.render();
-		AccountController.getAccounts(function(result, event) {
+		this.fetchAccounts();
+		this.delegateEvents();
+	},
+	fetchAccounts: function() {
+		Remoting.execute(AccountController.getAll, function(result, event) {
 			this.accounts.reset(result);
 		}, false, this);
 	}

@@ -1,0 +1,27 @@
+<html>
+	<head>
+		<link rel="stylesheet" href="css/app.css"/>
+	</head>
+	<body>
+		<div class="container-fluid">
+			<div class="row">
+				<div class="span12">
+					<h1>Accounts</h1>
+				</div>
+			</div>
+			<div class="row">
+				<div class="span12">
+					<table id="list" class="table table-striped"></table>
+					<div class="modal hide" id="accountDetail"></div>
+				</div>
+			</div>
+		</div>
+		<script src="js/vendor.js"></script>
+		<script src="js/app.js"></script>
+		<script type="text/javascript">
+			var Page = require('pages/accounts');
+			AccountController = require('lib/remote_stubs').AccountController;
+			(new Page()).render();
+		</script>
+	</body>
+</html>

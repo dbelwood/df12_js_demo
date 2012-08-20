@@ -25,6 +25,8 @@ exports.config =
           'vendor/scripts/underscore-1.3.1.js',
           'vendor/scripts/backbone-0.9.2.js',
           'vendor/scripts/backbone-mediator.js',
+          'vendor/scripts/Backbone.ModelBinder.min.js',
+          'vendor/scripts/Backbone.CollectionBinder.min.js',
 
           # Twitter Bootstrap jquery plugins
           'vendor/scripts/bootstrap/bootstrap-transition.js',
